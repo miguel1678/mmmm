@@ -1,0 +1,86 @@
+String incomingByte; // serial data that is receive from serial monitor
+int text;
+const int selangmasa=10; // Feel free to lower this value to increase the transmission speed. 
+// You need to lower it on both receiver and transmitter
+const int LED =13;	
+int a[7];
+unsigned long mili =millis();
+int huruf=0;
+
+void setup() 
+{
+  pinMode(LED, OUTPUT); 
+  Serial.begin(9600); 
+  Serial.print("Chat starting...");
+  Serial.println();
+}
+
+void loop() 
+{
+  if (Serial.available() > 0) {
+    text = Serial.read();
+    Serial.write(text);
+      int a[10], i ;       
+    for(i = 0; text > 0; i++)    
+    {    
+      a[i] = text%2;    
+      text = text/2;  
+    } 
+  
+    for(i = i-1; i >= 0; i--) // loop for 8 bit
+    {   
+      digitalWrite(LED, HIGH); // trigger Signal
+   		delay(selangmasa);
+   		digitalWrite(LED, a[i]); // bit signal either High or Low
+    	delay(2 * selangmasa); 
+    	digitalWrite(LED, LOW); // turn down the Led before next Bit
+   		delay(2 * selangmasa);
+    }    
+  }
+  char ayat[100]={0};
+  int j=0;
+  if(digitalRead(0)==LOW)
+  {
+    for (int i=0;i<7;i++)
+    {
+      mili=millis();
+      while((digitalRead(0)!=LOW)&&(i!=7))
+      if  (millis()-mili>3*selangmasa) 
+      {
+        i=7;
+        Serial.println(" ") ;
+        //ni utk tunggu isyarat seterusnya
+      }
+      delay(2*selangmasa);
+      a[i]=!digitalRead(0);
+      delay(2*selangmasa);
+     // Serial.println(a[i]);
+      j++;
+    }
+    //delay(4*selangmasa); // nak skip enter
+    int m=decimal(a);
+   // Serial.println("nilai binari");
+   // Serial.println(m);
+    char l= char(m);
+    //Serial.println("Simbol");
+    Serial.print(l);
+    //Serial.println("Simbol tamat ");
+  }
+}
+
+/////////function definition untuk tukar array binary kepada integer 
+
+int decimal(int c[])
+{
+ int i, j=0 , decimal=0, temp;
+  for(i=6;i>=0;i--)
+  {
+    temp=c[i];
+    for(int m=0;m<j;m++) temp=temp*2; //kuasakan sebanyak j kali, j ialah kedudukan digit dari kanan
+    decimal=decimal +temp;
+    j++;
+  }
+  
+  return decimal;
+}
+
